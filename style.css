@@ -1,0 +1,342 @@
+
+
+/* ============================
+   THEME TOKENS
+   ============================ */
+:root {
+  --velvet: #8e0c0c;         /* deep theater curtain */
+  --velvet-dark: #5d0707;    /* deeper reds for hover/headers */
+  --ruby: #b0171f;           /* accent red */
+  --gold: #ffd369;           /* marquee gold */
+  --gold-deep: #e5b84d;      /* hover gold */
+  --charcoal: #0d0f13;       /* near-black background */
+  --smoke: #171a21;          /* panel background */
+  --slate: #232733;          /* borders and separators */
+  --text: #f3f4f6;           /* primary text */
+  --muted: #c9cbd1;          /* secondary text */
+  --success: #36d399;        /* green accent */
+  --danger: #ff6b6b;         /* remove actions */
+
+  --radius-lg: 16px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+  --shadow-soft: 0 10px 30px rgba(0,0,0,.35);
+  --shadow-hard: 0 18px 50px rgba(0,0,0,.5);
+
+  --ring: 0 0 0 2px rgba(255,211,105,.3), 0 0 0 6px rgba(255,211,105,.12);
+}
+
+/* Subtle film grain / vignette feel */
+body {
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  color: var(--text);
+  background:
+    radial-gradient(1000px 600px at 10% 0%, rgba(255,211,105,0.05), transparent 60%),
+    radial-gradient(800px 500px at 90% 20%, rgba(142,12,12,.15), transparent 60%),
+    linear-gradient(180deg, #0a0b0e 0%, var(--charcoal) 100%);
+  min-height: 100vh;
+}
+
+/* ============================
+   HEADER (marquee-ish)
+   ============================ */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: linear-gradient(180deg, var(--velvet) 0%, var(--velvet-dark) 100%);
+  border-bottom: 3px solid var(--gold);
+  box-shadow: var(--shadow-hard);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px clamp(16px, 4vw, 40px);
+}
+
+header h1 {
+  margin: 0;
+  letter-spacing: 0.5px;
+  font-size: clamp(22px, 3vw, 34px);
+  text-transform: uppercase;
+  line-height: 1.1;
+  display: inline-flex;
+  align-items: center;
+  gap: .65rem;
+}
+
+/* marquee bulb underline */
+header h1::after {
+  content: "";
+  display: block;
+  height: 6px;
+  width: 100%;
+  background:
+    radial-gradient(8px 6px at 7% 50%, var(--gold) 40%, transparent 41%) repeat-x;
+  background-size: 26px 6px;
+  border-radius: 999px;
+}
+
+/* Watchlist button as a ticket stub */
+#view-watchlist-button {
+  --pad-x: 18px;
+  background: linear-gradient(180deg, var(--gold) 0%, var(--gold-deep) 100%);
+  color: #2a1a00;
+  font-weight: 700;
+  border: 0;
+  padding: 10px var(--pad-x);
+  border-radius: 999px;
+  position: relative;
+  cursor: pointer;
+  box-shadow: var(--shadow-soft);
+  transition: transform .08s ease, box-shadow .2s ease, filter .2s ease;
+}
+
+#view-watchlist-button::before,
+#view-watchlist-button::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  background: var(--charcoal);
+  border-radius: 50%;
+}
+#view-watchlist-button::before { left: -6px; }
+#view-watchlist-button::after { right: -6px; }
+
+#view-watchlist-button:hover { filter: brightness(1.05); }
+#view-watchlist-button:active { transform: translateY(1px) scale(.99); }
+
+/* ============================
+   LAYOUT
+   ============================ */
+main {
+  padding: clamp(16px, 4vw, 40px);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+section {
+  margin-block: clamp(16px, 4vw, 36px);
+}
+
+/* ============================
+   FINDER FORM
+   ============================ */
+#finder-form-section {
+  background: linear-gradient(180deg, rgba(35,39,51,.65), rgba(23,26,33,.8));
+  border: 1px solid var(--slate);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  padding: clamp(16px, 3vw, 28px);
+  backdrop-filter: blur(6px);
+}
+
+#finder-form-section h2 {
+  margin-top: 0;
+  font-size: clamp(18px, 2.2vw, 28px);
+  letter-spacing: .25px;
+}
+
+#finder-form {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 18px;
+}
+
+.form-group { grid-column: span 12; }
+
+/* On wider screens, arrange nicely */
+@media (min-width: 720px) {
+  .form-group:nth-child(1),
+  .form-group:nth-child(2),
+  .form-group:nth-child(3) { grid-column: span 4; }
+  .form-group:nth-child(4) { grid-column: span 12; }
+  .form-group:nth-child(5) { grid-column: span 12; }
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+select,
+input[type="text"] {
+  width: 100%;
+  background: #0f1218;
+  color: var(--text);
+  border: 1px solid #2a2f3d;
+  border-radius: var(--radius-sm);
+  padding: 12px 12px;
+  outline: none;
+  transition: box-shadow .15s ease, border-color .15s ease;
+}
+
+select:focus,
+input[type="text"]:focus {
+  border-color: var(--gold);
+  box-shadow: var(--ring);
+}
+
+/* Streaming services as pill list */
+#streaming-services-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px 14px;
+  background: #0f1218;
+  border: 1px dashed #2a2f3d;
+  border-radius: var(--radius-md);
+  padding: 14px;
+}
+
+#streaming-services-list input[type="checkbox"] {
+  accent-color: var(--gold);
+}
+
+/* Submit button — spotlight red */
+#recommend-button {
+  grid-column: span 12;
+  background: linear-gradient(180deg, var(--ruby) 0%, var(--velvet) 100%);
+  border: 1px solid #3b0c0e;
+  color: #fff2f2;
+  font-weight: 700;
+  padding: 14px 18px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  letter-spacing: .3px;
+  text-transform: uppercase;
+  box-shadow: var(--shadow-soft);
+  transition: transform .08s ease, filter .15s ease, box-shadow .2s ease;
+}
+#recommend-button:hover { filter: brightness(1.05); }
+#recommend-button:active { transform: translateY(1px); }
+
+/* ============================
+   RESULTS GRID (posters)
+   ============================ */
+#results-container h2 {
+  font-size: clamp(18px, 2vw, 26px);
+  margin-bottom: 14px;
+}
+
+.movie-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: clamp(14px, 2vw, 20px);
+}
+
+/* 3D flip cards */
+.movie-card {
+  perspective: 1000px;
+}
+
+.movie-card-inner {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform .6s cubic-bezier(.2,.6,.2,1);
+  border-radius: var(--radius-md);
+}
+
+.movie-card:hover .movie-card-inner {
+  transform: rotateY(180deg);
+}
+
+.movie-card-front,
+.movie-card-back {
+  position: relative;
+  background: linear-gradient(180deg, #141824 0%, #0e1017 100%);
+  border: 1px solid #252a38;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
+  padding: 12px;
+  backface-visibility: hidden;
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  overflow: hidden;
+}
+
+.movie-card-back {
+  position: absolute;
+  inset: 0;
+  transform: rotateY(180deg);
+}
+
+.movie-poster {
+  width: 100%;
+  aspect-ratio: 2/3;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid #2b3040;
+  box-shadow: 0 8px 20px rgba(0,0,0,.45);
+}
+
+.movie-title {
+  margin: 10px 0 8px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.movie-description {
+  color: var(--muted);
+  font-size: .95rem;
+}
+
+.movie-streaming-info {
+  margin-top: auto;
+  color: var(--gold);
+  font-weight: 600;
+}
+
+/* Card CTAs */
+.add-to-watchlist-btn,
+.remove-from-watchlist-btn {
+  margin-top: 8px;
+  width: 100%;
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-weight: 700;
+  letter-spacing: .2px;
+  cursor: pointer;
+  transition: filter .15s ease, transform .08s ease;
+}
+
+.add-to-watchlist-btn { 
+  background: linear-gradient(180deg, var(--gold) 0%, var(--gold-deep) 100%);
+  color: #1b1400; 
+}
+.remove-from-watchlist-btn {
+  background: linear-gradient(180deg, var(--danger) 0%, #d95353 100%);
+  color: #fff7f7;
+}
+.add-to-watchlist-btn:hover,
+.remove-from-watchlist-btn:hover { filter: brightness(1.05); }
+.add-to-watchlist-btn:active,
+.remove-from-watchlist-btn:active { transform: translateY(1px); }
+
+
+
+/* ============================
+   UTILITIES
+   ============================ */
+
+/* gold focus ring on buttons via keyboard */
+button:focus-visible { box-shadow: var(--ring); outline: none; }
+
+/* smoother text */
+* { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+/* reduce motion if user prefers */
+@media (prefers-reduced-motion: reduce) {
+  .movie-card:hover .movie-card-inner { transform: none; }
+  .movie-card-inner { transition: none; }
+  #view-watchlist-button, #recommend-button, .add-to-watchlist-btn, .remove-from-watchlist-btn, #save-watchlist-button { transition: none; }
+}
