@@ -1,6 +1,7 @@
 
 const baseUrl = "https://api.themoviedb.org/3/";
 const accessToken = import.meta.env.TMBD_READ_ACCESS_TOKEN;
+const apiKey = import.meta.env.TMDB_API_KEY;
 
 
 async function getJson(url) {
@@ -16,6 +17,29 @@ async function getJson(url) {
   return await res.json();
 }
 
+
+
+// ====================
+// WATCH PROVIDERS
+// ====================
+
+// get streaming availability for a movie or TV show by ID
+// id: TMDB ID of the movie or show
+// type: "movie" or "tv"
+// country: 2-letter ISO country code (e.g. "US", "CA"), defaults to "US"
+// returns: object with arrays of flatrate (streaming), rent, and buy providers
+export async function getWatchProviders(id, type, country = "US") {
+  const data = await getJson(`${type}/${id}/watch/providers`);
+  const region = data.results?.[country];
+
+  if (!region) return { flatrate: [], rent: [], buy: [] };
+
+  return {
+    flatrate: region.flatrate || [],
+    rent: region.rent || [],
+    buy: region.buy || [],
+  };
+}
 
 
 
@@ -47,6 +71,50 @@ export async function getMovieDetails(id) {
   return data;
 }
 
+// get movie details + watch providers
+// returns combined object with movie info and providers data
+export async function getMovieFullDetails(id, country = "US") {
+  const [details, providers] = await Promise.all([
+    getMovieDetails(id),
+    getWatchProviders(id, "movie", country),
+  ]);
+  return { ...details, providers };
+}
+
+/** Example output for getMovieFullDetails(550)
+  {
+    "id": 550,
+    "title": "Fight Club",
+    "overview": "A depressed man...",
+    "release_date": "1999-10-15",
+    "genres": [
+      { "id": 18, "name": "Drama" }
+    ],
+    "vote_average": 8.4,
+    "poster_path": "/a26cQPRhJPX6GbWfQbvZdrrp9j9.jpg",
+    "providers": {
+      "flatrate": [
+        {
+          "provider_name": "Amazon Prime Video",
+          "logo_path": "/emthp39XA2YScoYL1p0sdbAH2WA.jpg"
+        }
+      ],
+      "rent": [
+        {
+          "provider_name": "Apple TV",
+          "logo_path": "/peURlLlr8jggOwK53fJ5wdQl05y.jpg"
+        }
+      ],
+      "buy": [
+        {
+          "provider_name": "Google Play Movies",
+          "logo_path": "/tbEdFQDwx5LEVr8WpSeXQSIirVq.jpg"
+        }
+      ]
+    }
+  }
+ */
+
 
 
 
@@ -77,6 +145,56 @@ export async function getTVDetails(id) {
   const data = await getJson(`tv/${id}?language=en-US`);
   return data;
 }
+
+// get TV details + watch providers
+// returns combined object with TV info and providers data
+export async function getTVFullDetails(id, country = "US") {
+  const [details, providers] = await Promise.all([
+    getTVDetails(id),
+    getWatchProviders(id, "tv", country),
+  ]);
+  return { ...details, providers };
+}
+
+/** example output for getTVFullDetails(1396)
+  {
+    "id": 1396,
+    "name": "Breaking Bad",
+    "overview": "A chemistry teacher diagnosed with cancer...",
+    "first_air_date": "2008-01-20",
+    "number_of_seasons": 5,
+    "genres": [
+      { "id": 18, "name": "Drama" },
+      { "id": 80, "name": "Crime" }
+    ],
+    "vote_average": 8.9,
+    "poster_path": "/ggFHVNu6YYI5L9pCfOacjizRGt.jpg",
+    "providers": {
+      "flatrate": [
+        {
+          "provider_name": "Netflix",
+          "logo_path": "/iFfT0hUUXQHktsvMsz68Pf77a1O.jpg"
+        },
+        {
+          "provider_name": "HBO Max",
+          "logo_path": "/Ajqyt5aNxNGjmF9uOfxArGrdf3X.jpg"
+        }
+      ],
+      "rent": [
+        {
+          "provider_name": "Apple TV",
+          "logo_path": "/peURlLlr8jggOwK53fJ5wdQl05y.jpg"
+        }
+      ],
+      "buy": [
+        {
+          "provider_name": "Google Play Movies",
+          "logo_path": "/tbEdFQDwx5LEVr8WpSeXQSIirVq.jpg"
+        }
+      ]
+    }
+  }
+ */
 
 
 
@@ -199,3 +317,7 @@ export function getPosterUrl(path, size = "w500") {
 export function getBackdropUrl(path, size = "w500") {
   return path ? `https://image.tmdb.org/t/p/${size}${path}` : "";
 }
+
+
+
+
