@@ -158,6 +158,10 @@
             </div>
         </section>
 
+            <section id="results-container">
+      <div class="movie-grid recommended-grid" id="results"></div>
+    </section>
+
     </main>
 
     <footer>
@@ -167,45 +171,7 @@
         </p>
     </footer>
 
-
-    <!-- WATCHLIST MODAL -->
-    <!-- JS: Show/Hide this modal when user clicks watchlist button -->
-    <div id="watchlist-modal" class="modal" style="display:none;">
-        <div class="modal-content">
-            <!-- JS Target: Close modal -->
-            <span class="close-button">&times;</span>
-
-            <h3>Your Watchlist Preview</h3>
-
-            <!-- JS Target: dynamically insert watchlist items here (same structure as recommended movies grid)-->
-            <div class="movie-grid watchlist-grid">
-                
-                <!-- Example watchlist movie card (same structure as recommended movies cards)-->
-                <div class="movie-card watchlist-card">
-                    <div class="movie-card-inner">
-
-                        <div class="movie-card-front">
-                            <img src="https://picsum.photos/200" alt="Movie Poster" class="movie-poster">
-                            <p class="movie-title">Movie Title ...</p>
-
-                            <!-- JS: Removes movie from watchlist -->
-                            <button class="remove-from-watchlist-btn">Remove</button> 
-                        </div>
-
-                        <div class="movie-card-back">
-                            <p class="movie-description">Movie description...</p>
-                            <p class="movie-streaming-info">Available on: ...</p>
-                        </div>
-
-                    </div>
-                </div>
-
-            </div>
-            
-            <!-- JS: Save watchlist to localStorage -->
-            <button id="save-watchlist-button">Save Watchlist to Local Storage</button>
-        </div>
-    </div>
+    <script type="module" src="./main.js"></script>
 
 </body>
 </html>
