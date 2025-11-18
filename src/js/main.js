@@ -1,7 +1,4 @@
 // main.js
-
-import "../css/style.css";
-
 import {
   getPopularMovies,
   getMoviesByGenres,
