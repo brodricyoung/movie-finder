@@ -3,18 +3,28 @@ const baseUrl = "https://api.themoviedb.org/3/";
 const accessToken = import.meta.env.VITE_TMDB_READ_ACCESS_TOKEN;
 const apiKey = import.meta.env.VITE_TMDB_API_KEY;
 
+// async function getJson(url) {
+//   const res = await fetch(baseUrl + url, {
+//     method: "GET",
+//     headers: {
+//       accept: "application/json",
+//       Authorization: `Bearer ${accessToken}`,
+//     },
+//   });
+
+//   if (!res.ok) throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
+//   return await res.json();
+// }
+
 async function getJson(url) {
-  const res = await fetch(baseUrl + url, {
-    method: "GET",
-    headers: {
-      accept: "application/json",
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
+  // append api_key as query parameter
+  const connector = url.includes("?") ? "&" : "?";
+  const res = await fetch(baseUrl + url + connector + `api_key=${apiKey}`);
 
   if (!res.ok) throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
   return await res.json();
 }
+
 
 
 
