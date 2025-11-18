@@ -1,7 +1,7 @@
 
 const baseUrl = "https://api.themoviedb.org/3/";
-const accessToken = import.meta.env.VITE_TMDB_READ_ACCESS_TOKEN;
-const apiKey = import.meta.env.VITE_TMDB_API_KEY;
+const accessToken = import.meta.env.TMBD_READ_ACCESS_TOKEN;
+const apiKey = import.meta.env.TMDB_API_KEY;
 
 async function getJson(url) {
   const res = await fetch(baseUrl + url, {
