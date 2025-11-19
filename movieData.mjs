@@ -1,7 +1,7 @@
 
 const baseUrl = "https://api.themoviedb.org/3/";
-const accessToken = import.meta.env.TMBD_READ_ACCESS_TOKEN;
-const apiKey = import.meta.env.TMDB_API_KEY;
+
+const accessToken = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI1NGM3NDJkMmI4ZTMzMDg5NjU4YjY1Njg1NWFjNDhhYiIsIm5iZiI6MTc2MjE5NzA3My4xNTI5OTk5LCJzdWIiOiI2OTA4ZmU1MWYwZGZmM2MzNTcyZmYyYmUiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.QtLk7w_yoeC1w1DjEBthRbkQoTvogp8EXh3EED0s-jQ";
 
 async function getJson(url) {
   const res = await fetch(baseUrl + url, {
