@@ -194,8 +194,27 @@ input[type="text"]:focus {
   padding: 14px;
 }
 
+#streaming-services-list .service-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #131722;
+  border: 1px solid #2a2f3d;
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: border-color .15s ease, box-shadow .15s ease, transform .08s ease;
+}
+
+#streaming-services-list .service-pill:hover {
+  border-color: var(--gold);
+  box-shadow: var(--ring);
+}
+
 #streaming-services-list input[type="checkbox"] {
   accent-color: var(--gold);
+  width: 18px;
+  height: 18px;
 }
 
 /* Submit button — spotlight red */
@@ -322,6 +341,81 @@ input[type="text"]:focus {
 .add-to-watchlist-btn:active,
 .remove-from-watchlist-btn:active { transform: translateY(1px); }
 
+
+
+/* ============================
+   WATCHLIST MODAL
+   ============================ */
+.watchlist-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  z-index: 200;
+  backdrop-filter: blur(4px);
+}
+
+.watchlist-modal.open {
+  display: flex;
+}
+
+.watchlist-dialog {
+  background: linear-gradient(180deg, var(--smoke) 0%, #10131b 100%);
+  border: 1px solid var(--slate);
+  box-shadow: var(--shadow-hard);
+  border-radius: var(--radius-lg);
+  width: min(100%, 900px);
+  max-height: calc(100vh - 80px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.watchlist-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px;
+  border-bottom: 1px solid #232733;
+  gap: 12px;
+}
+
+.watchlist-dialog h3 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.eyebrow {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.close-watchlist-btn {
+  border: 1px solid #2a2f3d;
+  background: #0f1218;
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.watchlist-grid {
+  padding: 18px;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  overflow-y: auto;
+}
+
+.watchlist-empty {
+  margin: 0;
+  padding: 16px 18px 0;
+  color: var(--muted);
+}
 
 
 /* ============================
