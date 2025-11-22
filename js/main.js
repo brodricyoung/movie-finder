@@ -6,7 +6,7 @@ import {
   getTVShowsByGenres,
   getGenreIds,
   getPosterUrl,
-} from "./movieData.mjs";
+} from "../js/movieData.mjs";
 
 // simple localStorage helpers to remember user choices between visits
 const STORAGE_KEY = "movieFinderPreferences";

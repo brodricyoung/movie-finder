@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Movie Finder</title>
     <!-- Links to css and javasript files -->
-     <link rel="stylesheet" href="style.css">
+     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
@@ -26,7 +26,7 @@
                 <div class="form-group">
                     <label for="mood-select">Select your current mood:</label>
                     <!-- JS: Read this value to filter movie search -->
-                    <select id="mood-select" required>  
+                    <select id="mood-select">  
                         <option value="">-- Choose a Mood --</option>
                         <option value="happy">Happy / Feel-Good</option>
                         <option value="excited">Exciting / Adrenaline Rush</option>
@@ -45,7 +45,7 @@
                 <div class="form-group">
                     <label for="genre-select">Select a Genre:</label>
                     <!-- JS: Read this value to filter movie search -->
-                    <select id="genre-select" required> 
+                    <select id="genre-select"> 
                         <option value="">-- Choose a Genre --</option>
                         <option value="action">Action</option>
                         <option value="comedy">Comedy</option>
@@ -73,7 +73,7 @@
                 <div class="form-group">
                     <label for="content-type-select">Content Type:</label>
                     <!-- JS: Read this value to filter movie search -->
-                    <select id="content-type-select" name="content-type" required>  
+                    <select id="content-type-select" name="content-type">  
                         <option value="">-- Choose Content Type --</option>
                         <option value="movie">Movie</option>
                         <option value="tv">TV Show</option>
@@ -204,7 +204,7 @@
         </p>
     </footer>
 
-    <script type="module" src="./main.js"></script>
+    <script type="module" src="js/main.js"></script>
 
 </body>
 </html>
