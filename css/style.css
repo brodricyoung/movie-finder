@@ -38,6 +38,15 @@ body {
   min-height: 100vh;
 }
 
+body.zoom-active::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(2px);
+  z-index: 10;
+}
+
 /* ============================
    HEADER (marquee-ish)
    ============================ */
@@ -53,6 +62,12 @@ header {
   justify-content: space-between;
   gap: 16px;
   padding: 18px clamp(16px, 4vw, 40px);
+}
+
+header .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
 }
 
 header h1 {
@@ -76,6 +91,63 @@ header h1::after {
     radial-gradient(8px 6px at 7% 50%, var(--gold) 40%, transparent 41%) repeat-x;
   background-size: 26px 6px;
   border-radius: 999px;
+}
+
+.primary-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.primary-nav a {
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 600;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  transition: background-color .15s ease, color .15s ease;
+}
+
+.primary-nav a:hover,
+.primary-nav a:focus-visible {
+  background: rgba(0,0,0,0.15);
+  color: #fff;
+}
+
+.menu-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-sm);
+  border: 1px solid #6b0a0a;
+  background: #6b0a0a;
+  color: var(--text);
+  cursor: pointer;
+  padding: 6px;
+  box-shadow: var(--shadow-soft);
+}
+
+.menu-toggle .bar {
+  display: block;
+  height: 3px;
+  width: 100%;
+  border-radius: 999px;
+  background: var(--gold);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* Watchlist button as a ticket stub */
@@ -109,6 +181,48 @@ header h1::after {
 
 #view-watchlist-button:hover { filter: brightness(1.05); }
 #view-watchlist-button:active { transform: translateY(1px) scale(.99); }
+
+@media (max-width: 720px) {
+  header {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  header .brand {
+    flex: 1;
+    justify-content: space-between;
+  }
+
+  .menu-toggle {
+    display: inline-flex;
+  }
+
+  .primary-nav {
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    margin-top: 8px;
+    background: rgba(0, 0, 0, 0.22);
+    border: 1px solid #5d0707;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .primary-nav.open {
+    display: flex;
+  }
+
+  .primary-nav a {
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .primary-nav a:last-child {
+    border-bottom: 0;
+  }
+}
 
 /* ============================
    LAYOUT
@@ -252,6 +366,7 @@ input[type="text"]:focus {
 /* 3D flip cards */
 .movie-card {
   perspective: 1000px;
+  position: relative;
 }
 
 .movie-card-inner {
@@ -261,7 +376,30 @@ input[type="text"]:focus {
   border-radius: var(--radius-md);
 }
 
-.movie-card:hover .movie-card-inner {
+.movie-card.zoomed {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: min(90vw, 420px);
+  max-width: 420px;
+  transform: translate(-50%, -50%) translateY(60px) scale(1.05);
+  z-index: 20;
+}
+
+@media (max-width: 720px) {
+  .movie-card.zoomed {
+    width: 94vw;
+    max-width: 520px;
+    transform: translate(-50%, -50%) translateY(36px) scale(1.02);
+  }
+}
+
+.movie-card.zoomed .movie-card-inner {
+  transform: none;
+  box-shadow: 0 18px 40px rgba(0,0,0,.55);
+}
+
+.movie-card.zoomed:hover .movie-card-inner {
   transform: rotateY(180deg);
 }
 
@@ -272,12 +410,12 @@ input[type="text"]:focus {
   border: 1px solid #252a38;
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-soft);
-  padding: 12px;
+  padding: 10px;
   backface-visibility: hidden;
-  min-height: 320px;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   justify-content: flex-start;
   overflow: hidden;
 }
@@ -295,10 +433,11 @@ input[type="text"]:focus {
   border-radius: 10px;
   border: 1px solid #2b3040;
   box-shadow: 0 8px 20px rgba(0,0,0,.45);
+  margin-bottom: 4px;
 }
 
 .movie-title {
-  margin: 10px 0 8px;
+  margin: 6px 0 8px;
   font-weight: 700;
   text-align: center;
 }
@@ -312,6 +451,19 @@ input[type="text"]:focus {
   margin-top: auto;
   color: var(--gold);
   font-weight: 600;
+}
+
+.movie-card-footer {
+  margin-top: 0;
+  background: linear-gradient(180deg, #161a24 0%, #0f1118 100%);
+  border: 1px solid #252a38;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
 }
 
 /* Card CTAs */
@@ -430,7 +582,7 @@ button:focus-visible { box-shadow: var(--ring); outline: none; }
 
 /* reduce motion if user prefers */
 @media (prefers-reduced-motion: reduce) {
-  .movie-card:hover .movie-card-inner { transform: none; }
+  .movie-card .movie-card-inner { transform: none !important; }
   .movie-card-inner { transition: none; }
   #view-watchlist-button, #recommend-button, .add-to-watchlist-btn, .remove-from-watchlist-btn, #save-watchlist-button { transition: none; }
 }

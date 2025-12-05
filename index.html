@@ -10,7 +10,22 @@
 <body>
 
     <header>
-        <h1>Movie Finder</h1>
+        <div class="brand">
+            <button id="menu-toggle" class="menu-toggle" aria-expanded="false" aria-controls="primary-nav">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+            <h1>Movie Finder</h1>
+        </div>
+
+        <nav id="primary-nav" class="primary-nav" aria-label="Main navigation">
+            <a href="#finder-form-section">Finder</a>
+            <a href="#streaming-services-list">Services</a>
+            <a href="#results">Recommended</a>
+        </nav>
+
         <!-- JS Target: Toggles the watchlist modal -->
         <button id="view-watchlist-button">Watchlist</button>
     </header>
@@ -152,27 +167,6 @@
 
             <!-- JS Target: dynamically insert recommendation cards here -->
             <div class="movie-grid recommended-grid">
-
-                <!-- JS: Example of one movie card template -->
-                <div class="movie-card recommended-card">
-                    <div class="movie-card-inner">
-
-                        <div class="movie-card-front">
-                            <img src="https://picsum.photos/200" alt="Movie Poster" class="movie-poster">
-                            <p class="movie-title">Movie Title ...</p>
-
-                            <!-- JS: Adds item to watchlist -->
-                            <button class="add-to-watchlist-btn">Add to Watchlist</button>
-                        </div>
-
-                        <div class="movie-card-back">
-                            <p class="movie-description">Movie description...</p>
-                            <p class="movie-streaming-info">Available on: ...</p>
-                        </div>
-
-                    </div>
-                </div>
-
             </div>
     </section>
 

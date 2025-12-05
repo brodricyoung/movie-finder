@@ -70,12 +70,19 @@ function card(item, type, isSaved) {
   const poster = getPosterUrl(item.poster_path) || "";
   const rating =
     typeof item.vote_average === "number" ? item.vote_average.toFixed(1) : "—";
+  const overview = safe(item.overview) || "No description available.";
   return `
-    <article class="card">
-      ${poster ? `<img class="movie-poster" loading="lazy" src="${poster}" alt="${title} poster">` : ""}
-      <div class="card-body">
-        <h3 class="movie-title">${title}</h3>
-        <p class="meta">⭐ ${rating}</p>
+    <article class="movie-card recommended-card">
+      <div class="movie-card-inner">
+        <div class="movie-card-front">
+          ${poster ? `<img class="movie-poster" loading="lazy" src="${poster}" alt="${title} poster">` : ""}
+        </div>
+        <div class="movie-card-back">
+          <p class="movie-description">${overview}</p>
+        </div>
+      </div>
+      <div class="movie-card-footer">
+        <p class="movie-title">${title}</p>
         <button
           class="add-to-watchlist-btn"
           data-id="${item.id}"
@@ -187,8 +194,25 @@ document.addEventListener("DOMContentLoaded", () => {
   const watchlistModal = $("watchlist-modal");
   const watchlistClose = $("close-watchlist-button");
   const watchlistContent = $("watchlist-content");
+  const nav = document.getElementById("primary-nav");
+  const navToggle = document.getElementById("menu-toggle");
 
   const prefs = loadPrefs();
+
+  if (nav && navToggle) {
+    navToggle.addEventListener("click", () => {
+      const expanded = navToggle.getAttribute("aria-expanded") === "true";
+      navToggle.setAttribute("aria-expanded", String(!expanded));
+      nav.classList.toggle("open");
+    });
+
+    nav.addEventListener("click", (e) => {
+      if (e.target.matches("a")) {
+        nav.classList.remove("open");
+        navToggle.setAttribute("aria-expanded", "false");
+      }
+    });
+  }
 
   if (mood && prefs.mood) mood.value = prefs.mood;
   if (genre && prefs.genre) genre.value = prefs.genre;
@@ -288,7 +312,37 @@ document.addEventListener("DOMContentLoaded", () => {
       renderWatchlist();
       syncWatchlistButtons();
     });
+
+    results.addEventListener("click", (e) => {
+      const img = e.target.closest(".movie-poster");
+      if (!img) return;
+      const cardEl = img.closest(".movie-card");
+      if (!cardEl) return;
+
+      const wasZoomed = cardEl.classList.contains("zoomed");
+      document.body.classList.remove("zoom-active");
+      document.querySelectorAll(".movie-card.zoomed").forEach((card) => card.classList.remove("zoomed"));
+
+      if (!wasZoomed) {
+        cardEl.classList.add("zoomed");
+        document.body.classList.add("zoom-active");
+      }
+    });
   }
+
+  // Close zoomed poster when clicking outside it
+  document.addEventListener("click", (e) => {
+    if (!document.body.classList.contains("zoom-active")) return;
+    const zoomed = document.querySelector(".movie-card.zoomed");
+    if (!zoomed) {
+      document.body.classList.remove("zoom-active");
+      return;
+    }
+    if (!zoomed.contains(e.target)) {
+      zoomed.classList.remove("zoomed");
+      document.body.classList.remove("zoom-active");
+    }
+  });
 
   // watchlist modal toggles
   const openWatchlist = () => {
