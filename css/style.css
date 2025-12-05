@@ -359,8 +359,14 @@ input[type="text"]:focus {
 
 .movie-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: clamp(14px, 2vw, 20px);
+}
+
+@media (max-width: 720px) {
+  .movie-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
 }
 
 /* 3D flip cards */
@@ -372,7 +378,8 @@ input[type="text"]:focus {
 .movie-card-inner {
   position: relative;
   transform-style: preserve-3d;
-  transition: transform .6s cubic-bezier(.2,.6,.2,1);
+  transition: transform 1s cubic-bezier(.25,.8,.25,1);
+  will-change: transform;
   border-radius: var(--radius-md);
 }
 
@@ -388,18 +395,23 @@ input[type="text"]:focus {
 
 @media (max-width: 720px) {
   .movie-card.zoomed {
-    width: 94vw;
-    max-width: 520px;
-    transform: translate(-50%, -50%) translateY(36px) scale(1.02);
+    width: 92vw;
+    max-width: 360px;
+    transform: translate(-50%, -50%) translateY(48px) scale(1.02);
   }
 }
 
 .movie-card.zoomed .movie-card-inner {
   transform: none;
   box-shadow: 0 18px 40px rgba(0,0,0,.55);
+  width: 100%;
 }
 
-.movie-card.zoomed:hover .movie-card-inner {
+.movie-card.zoomed .movie-poster {
+  max-height: 70vh;
+}
+
+.movie-card.zoomed.flip .movie-card-inner {
   transform: rotateY(180deg);
 }
 
@@ -434,6 +446,31 @@ input[type="text"]:focus {
   border: 1px solid #2b3040;
   box-shadow: 0 8px 20px rgba(0,0,0,.45);
   margin-bottom: 4px;
+  max-height: clamp(240px, 55vh, 320px);
+}
+
+.zoom-close {
+  display: none;
+  position: absolute;
+  top: -14px;
+  right: -14px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #2b3040;
+  background: rgba(0,0,0,0.75);
+  color: var(--text);
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+  z-index: 3;
+}
+
+.movie-card.zoomed .zoom-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-soft);
 }
 
 .movie-title {

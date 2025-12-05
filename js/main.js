@@ -81,6 +81,7 @@ function card(item, type, isSaved) {
           <p class="movie-description">${overview}</p>
         </div>
       </div>
+      <button class="zoom-close" type="button" aria-label="Close poster view">&times;</button>
       <div class="movie-card-footer">
         <p class="movie-title">${title}</p>
         <button
@@ -314,25 +315,50 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     results.addEventListener("click", (e) => {
-      const img = e.target.closest(".movie-poster");
-      if (!img) return;
-      const cardEl = img.closest(".movie-card");
+      const cardEl = e.target.closest(".movie-card");
       if (!cardEl) return;
 
-      const wasZoomed = cardEl.classList.contains("zoomed");
-      document.body.classList.remove("zoom-active");
-      document.querySelectorAll(".movie-card.zoomed").forEach((card) => card.classList.remove("zoomed"));
+      const isZoomed = cardEl.classList.contains("zoomed");
+      const clickedPosterArea = e.target.closest(".movie-card-inner");
 
-      if (!wasZoomed) {
-        cardEl.classList.add("zoomed");
-        document.body.classList.add("zoom-active");
+      // If already zoomed and the user clicks the card face/back, toggle flip
+      if (isZoomed && clickedPosterArea) {
+        cardEl.classList.toggle("flip");
+        return;
       }
+
+      // Only allow zoom from poster click (so footer buttons don't zoom)
+      const img = e.target.closest(".movie-poster");
+      if (!img) return;
+
+      // zoom this card and reset others
+      document.body.classList.remove("zoom-active");
+      document.querySelectorAll(".movie-card.zoomed").forEach((card) => {
+        card.classList.remove("zoomed");
+        card.classList.remove("flip");
+      });
+
+      cardEl.classList.add("zoomed");
+      document.body.classList.add("zoom-active");
     });
   }
 
   // Close zoomed poster when clicking outside it
   document.addEventListener("click", (e) => {
     if (!document.body.classList.contains("zoom-active")) return;
+
+    // allow close button inside card
+    const closeBtn = e.target.closest(".zoom-close");
+    if (closeBtn) {
+      const card = closeBtn.closest(".movie-card");
+      if (card) {
+        card.classList.remove("zoomed");
+        card.classList.remove("flip");
+      }
+      document.body.classList.remove("zoom-active");
+      return;
+    }
+
     const zoomed = document.querySelector(".movie-card.zoomed");
     if (!zoomed) {
       document.body.classList.remove("zoom-active");
@@ -340,6 +366,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if (!zoomed.contains(e.target)) {
       zoomed.classList.remove("zoomed");
+      zoomed.classList.remove("flip");
       document.body.classList.remove("zoom-active");
     }
   });
