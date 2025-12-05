@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Watchlist - Movie Finder</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <h1>My Watchlist</h1>
+        <a id="back-to-finder" href="index.html" role="button">Back to Finder</a>
+    </header>
+
+    <main>
+        <section id="watchlist-page-container">
+            <h2 id="watchlist-title">Saved Titles</h2>
+
+            <p id="watchlist-empty" class="watchlist-empty" style="display:none;">
+                Your watchlist is empty. Add something from the <a href="index.html">recommendations page</a>!
+            </p>
+
+            <section id="recently-added-section" style="display: none;">
+                <h3>Recently Added This Session</h3>
+                <div class="movie-grid watchlist-grid" id="recently-added-content"></div>
+                <hr>
+            </section>
+            
+            <section id="full-watchlist-section">
+                <h3>My Full List</h3>
+                <div class="movie-grid watchlist-grid" id="full-watchlist-content" aria-live="polite"></div>
+            </section>
+
+        </section>
+    </main>
+
+    <script type="module" src="js/watchlist.js"></script>
+    
+    </body>
+</html>

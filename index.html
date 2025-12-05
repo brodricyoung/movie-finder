@@ -11,8 +11,7 @@
 
     <header>
         <h1>Movie Finder</h1>
-        <!-- JS Target: Toggles the watchlist modal -->
-        <button id="view-watchlist-button">Watchlist</button>
+        <a id="view-watchlist-button" href="watchlist.html" role="button">Watchlist</a>
     </header>
 
     <main>
@@ -179,21 +178,6 @@
             <section id="results-container">
       <div class="movie-grid recommended-grid" id="results"></div>
     </section>
-
-    <!-- WATCHLIST MODAL -->
-    <div id="watchlist-modal" class="watchlist-modal" aria-hidden="true">
-      <div class="watchlist-dialog" role="dialog" aria-modal="true" aria-labelledby="watchlist-title">
-        <div class="watchlist-dialog-header">
-          <div>
-            <p class="eyebrow">Saved titles</p>
-            <h3 id="watchlist-title">My Watchlist</h3>
-          </div>
-          <button id="close-watchlist-button" class="close-watchlist-btn" type="button">Close</button>
-        </div>
-        <p id="watchlist-empty" class="watchlist-empty">Your watchlist is empty. Add something from the recommendations!</p>
-        <div class="movie-grid watchlist-grid" id="watchlist-content" aria-live="polite"></div>
-      </div>
-    </div>
 
     </main>
 

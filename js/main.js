@@ -8,6 +8,8 @@ import {
   getPosterUrl,
 } from "../js/movieData.mjs";
 
+let currentSessionAddedIds = [];
+
 // simple localStorage helpers to remember user choices between visits
 const STORAGE_KEY = "movieFinderPreferences";
 const loadPrefs = () => {
@@ -54,12 +56,6 @@ const addToWatchlist = (item) => {
   saveWatchlist(next);
   return next;
 };
-const removeFromWatchlist = (id, type) => {
-  const current = loadWatchlist();
-  const next = current.filter((entry) => !(entry.id === id && entry.type === type));
-  saveWatchlist(next);
-  return next;
-};
 
 // ---------- helpers ----------
 const $ = (id) => document.getElementById(id);
@@ -101,43 +97,6 @@ function render(list, type) {
   results.innerHTML = list.map((m) => card(m, type, saved.some((item) => item.id === m.id && item.type === type))).join("");
 }
 
-function watchlistCard(item) {
-  const poster = item.poster || "";
-  const title = safe(item.title);
-  const typeLabel = item.type === "tv" ? "TV Show" : "Movie";
-  return `
-    <article class="card">
-      ${poster ? `<img class="movie-poster" loading="lazy" src="${poster}" alt="${title} poster">` : ""}
-      <div class="card-body">
-        <h3 class="movie-title">${title}</h3>
-        <p class="meta">${typeLabel}</p>
-        <button
-          class="remove-from-watchlist-btn"
-          data-id="${item.id}"
-          data-type="${item.type}"
-        >
-          Remove
-        </button>
-      </div>
-    </article>
-  `;
-}
-
-function renderWatchlist() {
-  const container = $("watchlist-content");
-  const empty = $("watchlist-empty");
-  if (!container) return;
-
-  const list = loadWatchlist();
-  if (!list.length) {
-    container.innerHTML = "";
-    if (empty) empty.style.display = "block";
-    return;
-  }
-
-  container.innerHTML = list.map((item) => watchlistCard(item)).join("");
-  if (empty) empty.style.display = "none";
-}
 
 function syncWatchlistButtons() {
   const saved = loadWatchlist();
@@ -183,10 +142,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const streamingServices = Array.from(
     document.querySelectorAll("#streaming-services-list input[type='checkbox']")
   );
-  const watchlistBtn = $("view-watchlist-button");
-  const watchlistModal = $("watchlist-modal");
-  const watchlistClose = $("close-watchlist-button");
-  const watchlistContent = $("watchlist-content");
+  
+  const watchlistLink = $("view-watchlist-button");
 
   const prefs = loadPrefs();
 
@@ -206,12 +163,32 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
+
+  // Helper to update the watchlist link url parameters with the new_ids
+const updateWatchlistLink = (currentType) => {
+  if (watchlistLink) {
+    // 💡 FIX: Start building the URL from the base link
+    const url = new URL("watchlist.html", document.baseURI);
+    
+    // 2. CRITICAL: Always set the 'new_ids' parameter.
+    // If the array is empty, .join(',') returns "", resulting in ?new_ids=
+    const idsString = currentSessionAddedIds.join(',');
+    url.searchParams.set("new_ids", idsString);
+    
+    // Note: If you still had the 'type' parameter, you would add it here:
+    // url.searchParams.set("type", currentType);
+    
+    watchlistLink.href = url.toString();
+  }
+};
+
   const initialType = typeSel.value || "movie";
   if (prefs.genre) {
     loadByGenre(initialType, prefs.genre).catch(console.error);
   } else {
     loadPopular(initialType).catch(console.error);
   }
+  updateWatchlistLink(initialType); // Initial update of the watchlist link
 
   // submit: filter by genre + type
   form.addEventListener("submit", (e) => {
@@ -228,6 +205,7 @@ document.addEventListener("DOMContentLoaded", () => {
       liked: liked ? liked.value || "" : "",
       streamingServices: streaming,
     });
+    updateWatchlistLink(selectedType); // Update link on form submit
 
     loadByGenre(selectedType, genre.value || "").catch((err) => {
       console.error(err);
@@ -240,6 +218,7 @@ document.addEventListener("DOMContentLoaded", () => {
   typeSel.addEventListener("change", () => {
     const newType = typeSel.value || "movie";
     savePrefs({ type: newType });
+    updateWatchlistLink(newType); // Update link on type change
     loadPopular(newType).catch(console.error);
   });
 
@@ -285,44 +264,13 @@ document.addEventListener("DOMContentLoaded", () => {
       addToWatchlist({ id, type, title, poster });
       btn.textContent = "Saved to Watchlist";
       btn.disabled = true;
-      renderWatchlist();
-      syncWatchlistButtons();
-    });
-  }
-
-  // watchlist modal toggles
-  const openWatchlist = () => {
-    renderWatchlist();
-    if (watchlistModal) {
-      watchlistModal.classList.add("open");
-      watchlistModal.setAttribute("aria-hidden", "false");
-    }
-  };
-  const closeWatchlist = () => {
-    if (watchlistModal) {
-      watchlistModal.classList.remove("open");
-      watchlistModal.setAttribute("aria-hidden", "true");
-    }
-  };
-
-  if (watchlistBtn) watchlistBtn.addEventListener("click", openWatchlist);
-  if (watchlistClose) watchlistClose.addEventListener("click", closeWatchlist);
-  if (watchlistModal) {
-    watchlistModal.addEventListener("click", (e) => {
-      if (e.target === watchlistModal) closeWatchlist();
-    });
-  }
-
-  // handle removes inside watchlist modal
-  if (watchlistContent) {
-    watchlistContent.addEventListener("click", (e) => {
-      const btn = e.target.closest(".remove-from-watchlist-btn");
-      if (!btn) return;
-      const id = Number(btn.dataset.id);
-      const type = btn.dataset.type || "movie";
-      removeFromWatchlist(id, type);
-      renderWatchlist();
-      syncWatchlistButtons();
+      syncWatchlistButtons(); 
+      
+      if (!currentSessionAddedIds.includes(id)) {
+        currentSessionAddedIds.push(id);
+        const currentType = typeSel.value || "movie"; // Use current form value
+        updateWatchlistLink(currentType); 
+      }
     });
   }
 

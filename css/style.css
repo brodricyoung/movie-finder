@@ -79,7 +79,9 @@ header h1::after {
 }
 
 /* Watchlist button as a ticket stub */
-#view-watchlist-button {
+#view-watchlist-button, 
+#back-to-finder {
+  text-decoration: none;
   --pad-x: 18px;
   background: linear-gradient(180deg, var(--gold) 0%, var(--gold-deep) 100%);
   color: #2a1a00;
@@ -94,7 +96,9 @@ header h1::after {
 }
 
 #view-watchlist-button::before,
-#view-watchlist-button::after {
+#view-watchlist-button::after, 
+#back-to-finder::before,
+#back-to-finder::after {
   content: "";
   position: absolute;
   top: 50%;
@@ -104,11 +108,24 @@ header h1::after {
   background: var(--charcoal);
   border-radius: 50%;
 }
-#view-watchlist-button::before { left: -6px; }
-#view-watchlist-button::after { right: -6px; }
+#view-watchlist-button::before,
+#back-to-finder::before { 
+  left: -6px; 
+}
+#view-watchlist-button::after,
+#back-to-finder::after { 
+  right: -6px; 
+}
 
-#view-watchlist-button:hover { filter: brightness(1.05); }
-#view-watchlist-button:active { transform: translateY(1px) scale(.99); }
+#view-watchlist-button:hover 
+#back-to-finder:hover {
+  filter: brightness(1.05); 
+}
+
+#view-watchlist-button:active 
+#back-to-finder:active { 
+  transform: translateY(1px) scale(.99); 
+}
 
 /* ============================
    LAYOUT
@@ -432,5 +449,5 @@ button:focus-visible { box-shadow: var(--ring); outline: none; }
 @media (prefers-reduced-motion: reduce) {
   .movie-card:hover .movie-card-inner { transform: none; }
   .movie-card-inner { transition: none; }
-  #view-watchlist-button, #recommend-button, .add-to-watchlist-btn, .remove-from-watchlist-btn, #save-watchlist-button { transition: none; }
+  .view-watchlist-button, #recommend-button, .add-to-watchlist-btn, .remove-from-watchlist-btn, #save-watchlist-button { transition: none; }
 }
