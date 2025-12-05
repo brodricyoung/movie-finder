@@ -10,8 +10,24 @@
 <body>
 
     <header>
-        <h1>Movie Finder</h1>
-        <a id="view-watchlist-button" href="watchlist.html" role="button">Watchlist</a>
+        <div class="brand">
+            <button id="menu-toggle" class="menu-toggle" aria-expanded="false" aria-controls="primary-nav">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+            <h1>Movie Finder</h1>
+        </div>
+
+        <nav id="primary-nav" class="primary-nav" aria-label="Main navigation">
+            <a href="#finder-form-section">Finder</a>
+            <a href="#streaming-services-list">Services</a>
+            <a href="#results">Recommended</a>
+        </nav>
+
+        <!-- JS Target: Toggles the watchlist modal -->
+        <button id="view-watchlist-button">Watchlist</button>
     </header>
 
     <main>
@@ -26,7 +42,7 @@
                     <label for="mood-select">Select your current mood:</label>
                     <!-- JS: Read this value to filter movie search -->
                     <select id="mood-select">  
-                        <option value="">-- Choose a Mood --</option>
+                        <option value="">-- All Moods --</option>
                         <option value="happy">Happy / Feel-Good</option>
                         <option value="excited">Exciting / Adrenaline Rush</option>
                         <option value="calm">Calm / Relaxed</option>
@@ -45,7 +61,7 @@
                     <label for="genre-select">Select a Genre:</label>
                     <!-- JS: Read this value to filter movie search -->
                     <select id="genre-select"> 
-                        <option value="">-- Choose a Genre --</option>
+                        <option value="">-- All Genres --</option>
                         <option value="action">Action</option>
                         <option value="comedy">Comedy</option>
                         <option value="drama">Drama</option>
@@ -73,7 +89,7 @@
                     <label for="content-type-select">Content Type:</label>
                     <!-- JS: Read this value to filter movie search -->
                     <select id="content-type-select" name="content-type">  
-                        <option value="">-- Choose Content Type --</option>
+                        <option value="">-- All Types --</option>
                         <option value="movie">Movie</option>
                         <option value="tv">TV Show</option>
                     </select>
@@ -151,27 +167,6 @@
 
             <!-- JS Target: dynamically insert recommendation cards here -->
             <div class="movie-grid recommended-grid">
-
-                <!-- JS: Example of one movie card template -->
-                <div class="movie-card recommended-card">
-                    <div class="movie-card-inner">
-
-                        <div class="movie-card-front">
-                            <img src="https://picsum.photos/200" alt="Movie Poster" class="movie-poster">
-                            <p class="movie-title">Movie Title ...</p>
-
-                            <!-- JS: Adds item to watchlist -->
-                            <button class="add-to-watchlist-btn">Add to Watchlist</button>
-                        </div>
-
-                        <div class="movie-card-back">
-                            <p class="movie-description">Movie description...</p>
-                            <p class="movie-streaming-info">Available on: ...</p>
-                        </div>
-
-                    </div>
-                </div>
-
             </div>
     </section>
 

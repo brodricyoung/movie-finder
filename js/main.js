@@ -66,12 +66,20 @@ function card(item, type, isSaved) {
   const poster = getPosterUrl(item.poster_path) || "";
   const rating =
     typeof item.vote_average === "number" ? item.vote_average.toFixed(1) : "—";
+  const overview = safe(item.overview) || "No description available.";
   return `
-    <article class="card">
-      ${poster ? `<img class="movie-poster" loading="lazy" src="${poster}" alt="${title} poster">` : ""}
-      <div class="card-body">
-        <h3 class="movie-title">${title}</h3>
-        <p class="meta">⭐ ${rating}</p>
+    <article class="movie-card recommended-card">
+      <div class="movie-card-inner">
+        <div class="movie-card-front">
+          ${poster ? `<img class="movie-poster" loading="lazy" src="${poster}" alt="${title} poster">` : ""}
+        </div>
+        <div class="movie-card-back">
+          <p class="movie-description">${overview}</p>
+        </div>
+      </div>
+      <button class="zoom-close" type="button" aria-label="Close poster view">&times;</button>
+      <div class="movie-card-footer">
+        <p class="movie-title">${title}</p>
         <button
           class="add-to-watchlist-btn"
           data-id="${item.id}"
@@ -142,10 +150,29 @@ document.addEventListener("DOMContentLoaded", () => {
   const streamingServices = Array.from(
     document.querySelectorAll("#streaming-services-list input[type='checkbox']")
   );
-  
-  const watchlistLink = $("view-watchlist-button");
+  const watchlistBtn = $("view-watchlist-button");
+  const watchlistModal = $("watchlist-modal");
+  const watchlistClose = $("close-watchlist-button");
+  const watchlistContent = $("watchlist-content");
+  const nav = document.getElementById("primary-nav");
+  const navToggle = document.getElementById("menu-toggle");
 
   const prefs = loadPrefs();
+
+  if (nav && navToggle) {
+    navToggle.addEventListener("click", () => {
+      const expanded = navToggle.getAttribute("aria-expanded") === "true";
+      navToggle.setAttribute("aria-expanded", String(!expanded));
+      nav.classList.toggle("open");
+    });
+
+    nav.addEventListener("click", (e) => {
+      if (e.target.matches("a")) {
+        nav.classList.remove("open");
+        navToggle.setAttribute("aria-expanded", "false");
+      }
+    });
+  }
 
   if (mood && prefs.mood) mood.value = prefs.mood;
   if (genre && prefs.genre) genre.value = prefs.genre;
@@ -264,13 +291,100 @@ const updateWatchlistLink = (currentType) => {
       addToWatchlist({ id, type, title, poster });
       btn.textContent = "Saved to Watchlist";
       btn.disabled = true;
-      syncWatchlistButtons(); 
-      
-      if (!currentSessionAddedIds.includes(id)) {
-        currentSessionAddedIds.push(id);
-        const currentType = typeSel.value || "movie"; // Use current form value
-        updateWatchlistLink(currentType); 
+      renderWatchlist();
+      syncWatchlistButtons();
+    });
+
+    results.addEventListener("click", (e) => {
+      const cardEl = e.target.closest(".movie-card");
+      if (!cardEl) return;
+
+      const isZoomed = cardEl.classList.contains("zoomed");
+      const clickedPosterArea = e.target.closest(".movie-card-inner");
+
+      // If already zoomed and the user clicks the card face/back, toggle flip
+      if (isZoomed && clickedPosterArea) {
+        cardEl.classList.toggle("flip");
+        return;
       }
+
+      // Only allow zoom from poster click (so footer buttons don't zoom)
+      const img = e.target.closest(".movie-poster");
+      if (!img) return;
+
+      // zoom this card and reset others
+      document.body.classList.remove("zoom-active");
+      document.querySelectorAll(".movie-card.zoomed").forEach((card) => {
+        card.classList.remove("zoomed");
+        card.classList.remove("flip");
+      });
+
+      cardEl.classList.add("zoomed");
+      document.body.classList.add("zoom-active");
+    });
+  }
+
+  // Close zoomed poster when clicking outside it
+  document.addEventListener("click", (e) => {
+    if (!document.body.classList.contains("zoom-active")) return;
+
+    // allow close button inside card
+    const closeBtn = e.target.closest(".zoom-close");
+    if (closeBtn) {
+      const card = closeBtn.closest(".movie-card");
+      if (card) {
+        card.classList.remove("zoomed");
+        card.classList.remove("flip");
+      }
+      document.body.classList.remove("zoom-active");
+      return;
+    }
+
+    const zoomed = document.querySelector(".movie-card.zoomed");
+    if (!zoomed) {
+      document.body.classList.remove("zoom-active");
+      return;
+    }
+    if (!zoomed.contains(e.target)) {
+      zoomed.classList.remove("zoomed");
+      zoomed.classList.remove("flip");
+      document.body.classList.remove("zoom-active");
+    }
+  });
+
+  // watchlist modal toggles
+  const openWatchlist = () => {
+    renderWatchlist();
+    if (watchlistModal) {
+      watchlistModal.classList.add("open");
+      watchlistModal.setAttribute("aria-hidden", "false");
+    }
+  };
+  const closeWatchlist = () => {
+    if (watchlistModal) {
+      watchlistModal.classList.remove("open");
+      watchlistModal.setAttribute("aria-hidden", "true");
+    }
+  };
+
+  if (watchlistBtn) watchlistBtn.addEventListener("click", openWatchlist);
+  if (watchlistClose) watchlistClose.addEventListener("click", closeWatchlist);
+  if (watchlistModal) {
+    watchlistModal.addEventListener("click", (e) => {
+      if (e.target === watchlistModal) closeWatchlist();
+    });
+  }
+
+  // handle removes inside watchlist modal
+  if (watchlistContent) {
+    watchlistContent.addEventListener("click", (e) => {
+      const btn = e.target.closest(".remove-from-watchlist-btn");
+      if (!btn) return;
+      const id = Number(btn.dataset.id);
+      const type = btn.dataset.type || "movie";
+      removeFromWatchlist(id, type);
+      renderWatchlist();
+      syncWatchlistButtons();
     });
   }
 
