@@ -150,7 +150,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const streamingServices = Array.from(
     document.querySelectorAll("#streaming-services-list input[type='checkbox']")
   );
-  const watchlistBtn = $("view-watchlist-button");
+  const watchlistLink = $("view-watchlist-button");
   const watchlistModal = $("watchlist-modal");
   const watchlistClose = $("close-watchlist-button");
   const watchlistContent = $("watchlist-content");
@@ -289,6 +289,14 @@ const updateWatchlistLink = (currentType) => {
       const poster = btn.dataset.poster || "";
 
       addToWatchlist({ id, type, title, poster });
+
+      // 1. Add the ID to the session array if it's not already there.
+      if (!currentSessionAddedIds.includes(id)) {
+          currentSessionAddedIds.push(id);
+      }
+      // 2. Update the link URL to reflect the new ID immediately.
+      updateWatchlistLink(type);
+      
       btn.textContent = "Saved to Watchlist";
       btn.disabled = true;
       renderWatchlist();
