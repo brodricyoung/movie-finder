@@ -77,6 +77,49 @@ const getSelectedServices = () => {
         .map(cb => cb.value);
 };
 
+// Function to display the success banner
+function showSuccessBanner(duration = 5000) {
+    const banner = $("success-banner");
+    if (banner) {
+        // 1. Show the banner container
+        banner.style.display = "block";
+        
+        // 2. Use requestAnimationFrame to ensure display:block is applied before adding the visible class,
+        // which triggers the CSS transition (fade-in).
+        requestAnimationFrame(() => banner.classList.add("visible")); 
+        
+        // 3. Set a timeout to hide it after the duration (default 5 seconds)
+        setTimeout(() => {
+            banner.classList.remove("visible"); // Start fade-out
+            
+            // Wait for the fade-out transition (0.5s from CSS) to finish before setting display: none
+            setTimeout(() => {
+                banner.style.display = "none";
+            }, 500); 
+        }, duration);
+    }
+}
+
+// hide the success banner when loading starts
+function setLoadingState(isLoading) {
+    const loadingSpinner = $("loading-spinner");
+    const results = $("results");
+    const successBanner = $("success-banner"); // Get the new banner
+    
+    if (loadingSpinner) {
+        loadingSpinner.style.display = isLoading ? "block" : "none";
+    }
+    if (results) {
+        results.style.display = isLoading ? "none" : "grid"; 
+    }
+    
+    // Hide success banner immediately when a new search starts
+    if (successBanner && isLoading) {
+        successBanner.style.display = "none";
+        successBanner.classList.remove("visible");
+    }
+}
+
 function card(item, type, isSaved) {
   const title = type === "tv" ? safe(item.name) : safe(item.title);
   const poster = getPosterUrl(item.poster_path) || "";
@@ -296,6 +339,7 @@ const updateWatchlistLink = (currentType) => {
   }
 };
 
+
   const initialType = typeSel.value || "movie";
   if (prefs.genre) {
     loadByGenre(initialType, prefs.genre).catch(console.error);
@@ -310,8 +354,11 @@ const updateWatchlistLink = (currentType) => {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const resultsContainer = $("results");
+
+    // 1. SET LOADING STATE (Start)
+    setLoadingState(true); 
     
-    // 1. Save all preferences (existing logic)
+    // 2. Save all preferences (existing logic)
     const selectedType = typeSel.value || "movie";
     const streaming = streamingServices
       .filter((cb) => cb.checked)
@@ -326,13 +373,12 @@ const updateWatchlistLink = (currentType) => {
     });
     updateWatchlistLink(selectedType);
 
-    // 2. CHECK: Did the user type a "Previously Liked Movie"?
-    // If yes, this takes priority over Genre/Mood selections.
+    // 3. CHECK: Did the user type a "Previously Liked Movie"?
     const likedQuery = liked.value ? liked.value.trim() : "";
 
-    if (likedQuery) {
-      try {
-        // Handle multiple movies by taking the first one (e.g. "Matrix, Inception" -> "Matrix")
+    try {
+      if (likedQuery) {
+        // Handle multiple movies by taking the first one
         const firstTitle = likedQuery.split(",")[0].trim();
         
         // A. Search for the movie/show to get its ID
@@ -350,38 +396,87 @@ const updateWatchlistLink = (currentType) => {
           
           if (recommendations.length > 0) {
             render(recommendations, selectedType);
-            return; // EXIT HERE so we don't overwrite with genre results
+            // If successfully rendered, loading state will be unset below.
+            return; 
           }
-        } else {
-            console.warn("No results found for that title.");
         }
-      } catch (err) {
-        console.error("Error finding recommendations:", err);
+        // If search failed, flow continues to genre fallback
       }
-    }
 
-    // 3. Fallback: If no text input (or search failed), load by Genre/Popularity
-    loadByGenre(selectedType, genre.value || "").catch((err) => {
-      console.error(err);
+      // 4. Fallback: If no text input (or search failed), load by Genre/Popularity
+      // We call the underlying logic directly, which will call render.
+      const ids = getGenreIds(genre.value, selectedType, "|");
+      if (ids) {
+        if (selectedType === "tv") {
+          const shows = await getTVShowsByGenres(ids, 1, streaming);
+          render(shows, "tv");
+        } else {
+          const movies = await getMoviesByGenres(ids, 1, streaming);
+          render(movies, "movie");
+        }
+      } else {
+         // Load popular if no genre ID (this handles the initial load case too)
+         if (selectedType === "tv") {
+            const shows = await getPopularTVShows(1, streaming);
+            render(shows, "tv");
+          } else {
+            const movies = await getPopularMovies(1, streaming);
+            render(movies, "movie");
+          }
+      }
+
+    } catch (err) {
+      console.error("Failed to load results:", err);
       if (resultsContainer) resultsContainer.textContent = "Failed to load results.";
-    });
+    } finally {
+      // 5. SET LOADING STATE (Stop)
+      setLoadingState(false);
+      // 6. SHOW SUCCESS BANNER (Acknowledge results have loaded)
+      showSuccessBanner(5000);
+    }
   });
 
 
 
   // when user switches "Movie / TV Show", refresh the list
-  typeSel.addEventListener("change", () => {
+  typeSel.addEventListener("change", async () => {
+    setLoadingState(true); // <-- Start Loading
     const newType = typeSel.value || "movie";
     savePrefs({ type: newType });
     updateWatchlistLink(newType); 
     
-    // Check if we have a genre selected, otherwise load popular
-    if(genre.value) {
-        loadByGenre(newType, genre.value).catch(console.error);
-    } else {
-        loadPopular(newType).catch(console.error);
+    try {
+        // Check if we have a genre selected, otherwise load popular
+        const services = getSelectedServices();
+        const genres = genre.value || "";
+        const ids = getGenreIds(genres, newType, "|");
+
+        if(ids) {
+            if (newType === "tv") {
+              const shows = await getTVShowsByGenres(ids, 1, services);
+              render(shows, "tv");
+            } else {
+              const movies = await getMoviesByGenres(ids, 1, services);
+              render(movies, "movie");
+            }
+        } else {
+            if (newType === "tv") {
+              const shows = await getPopularTVShows(1, services);
+              render(shows, "tv");
+            } else {
+              const movies = await getPopularMovies(1, services);
+              render(movies, "movie");
+            }
+        }
+    } catch (error) {
+        console.error("Failed to change content type:", error);
+    } finally {
+        setLoadingState(false); // <-- Stop Loading
+        showSuccessBanner(5000); // Show for 5 seconds
     }
   });
+
+
 
   if (genre) {
     genre.addEventListener("change", () => {

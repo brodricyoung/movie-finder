@@ -31,6 +31,10 @@
 
     <main>
 
+            <div id="success-banner" class="search-banner" style="display:none;">
+                <p>✅ Recommendations successfully generated!</p>
+            </div>
+
         <section id="finder-form-section">
             <h2>Tell Us What You're in the Mood For</h2>
 
@@ -164,14 +168,12 @@
         <section id="results-container">
             <h2>Recommended for You</h2>
 
-            <!-- JS Target: dynamically insert recommendation cards here -->
-            <div class="movie-grid recommended-grid">
+            <div id="loading-spinner" class="loading-state" style="display:none;">
+                <p>Generating recommendations...</p>
             </div>
-    </section>
 
-            <section id="results-container">
-      <div class="movie-grid recommended-grid" id="results"></div>
-    </section>
+            <div class="movie-grid recommended-grid" id="results"></div>
+        </section>
 
     </main>
 

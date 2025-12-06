@@ -369,6 +369,50 @@ input[type="text"]:focus {
 /* ============================
    RESULTS GRID (posters)
    ============================ */
+
+/* General style for search status banners (success/loading) */
+.search-banner {
+    padding: 15px 20px;
+    margin: 20px 0;
+    border-radius: var(--radius-sm);
+    text-align: center;
+    font-weight: 700;
+    opacity: 0; /* Start hidden for transition */
+    transition: opacity 0.5s ease-in-out;
+}
+
+.search-banner p {
+    margin: 0;
+}
+
+/* Style for the success/results generated banner */
+#success-banner {
+    background-color: var(--success); /* Uses your defined green */
+    color: var(--charcoal); 
+}
+
+/* Class to make the banner visible */
+.search-banner.visible {
+    opacity: 1;
+}
+
+/* The existing loading style block should be updated to include the new loading-state class if it wasn't already there: */
+.loading-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--gold); 
+    font-size: 1.4rem;
+    font-weight: 600;
+}
+
+/* Ensure the results grid is hidden while loading */
+#results-container #results[style*="display: none"] {
+    opacity: 0;
+    pointer-events: none;
+    height: 0;
+    padding: 0;
+}
+
 #results-container h2 {
   font-size: clamp(18px, 2vw, 26px);
   margin-bottom: 14px;
