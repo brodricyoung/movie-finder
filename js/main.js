@@ -136,6 +136,32 @@ const getSelectedServices = () => {
         .map(cb => cb.value);
 };
 
+// Mood → genre suggestions to keep mood-only submissions meaningful
+const moodGenreMap = {
+  happy: ["comedy", "family", "animation"],
+  excited: ["action", "adventure", "thriller"],
+  calm: ["drama", "fantasy"],
+  pensive: ["mystery", "documentary", "drama"],
+  scared: ["horror", "thriller"],
+  silly: ["comedy", "animation"],
+  sad: ["drama", "romance"],
+  nostalgic: ["history", "family"],
+  educational: ["documentary"],
+  suspenseful: ["thriller", "crime", "mystery"],
+};
+
+const getGenreIdsForMood = (moodKey, type) => {
+  if (!moodKey) return "";
+  const genres = moodGenreMap[moodKey] || [];
+  return getGenreIds(genres, type, "|");
+};
+
+const resolveGenreIds = (selectedGenre, selectedMood, type) => {
+  const byGenre = getGenreIds(selectedGenre, type, "|");
+  if (byGenre) return byGenre;
+  return getGenreIdsForMood(selectedMood, type);
+};
+
 // Function to display the success banner
 function showSuccessBanner(duration = 5000) {
     const banner = $("success-banner");
@@ -412,10 +438,17 @@ const updateWatchlistLink = (currentType) => {
     urlApplied &&
     (genre.value || liked.value || streamingServices.some((cb) => cb.checked));
 
-  if (!shouldRunFromUrl && prefs.genre) {
-    loadByGenre(initialType, prefs.genre).catch(console.error);
-  } else if (!shouldRunFromUrl) {
-    loadPopular(initialType).catch(console.error);
+  if (!shouldRunFromUrl) {
+    const initialIds = resolveGenreIds(genre.value, mood ? mood.value || "" : "", initialType);
+    if (initialIds) {
+      if (initialType === "tv") {
+        getTVShowsByGenres(initialIds, 1, getSelectedServices()).then((shows) => render(shows, "tv")).catch(console.error);
+      } else {
+        getMoviesByGenres(initialIds, 1, getSelectedServices()).then((movies) => render(movies, "movie")).catch(console.error);
+      }
+    } else {
+      loadPopular(initialType).catch(console.error);
+    }
   }
   updateWatchlistLink(initialType);
 
@@ -425,6 +458,7 @@ const updateWatchlistLink = (currentType) => {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const resultsContainer = $("results");
+    const moodKey = mood ? mood.value || "" : "";
 
     // 1. SET LOADING STATE (Start)
     setLoadingState(true); 
@@ -438,14 +472,14 @@ const updateWatchlistLink = (currentType) => {
     savePrefs({
       genre: genre.value || "",
       type: selectedType,
-      mood: mood ? mood.value || "" : "",
+      mood: moodKey,
       liked: liked ? liked.value || "" : "",
       streamingServices: streaming,
     });
     updateQueryParamsFromForm({
       type: selectedType,
       genre: genre.value || "",
-      mood: mood ? mood.value || "" : "",
+      mood: moodKey,
       liked: liked ? liked.value || "" : "",
       services: streaming,
     });
@@ -483,7 +517,7 @@ const updateWatchlistLink = (currentType) => {
 
       // 4. Fallback: If no text input (or search failed), load by Genre/Popularity
       // We call the underlying logic directly, which will call render.
-      const ids = getGenreIds(genre.value, selectedType, "|");
+      const ids = resolveGenreIds(genre.value, moodKey, selectedType);
       if (ids) {
         if (selectedType === "tv") {
           const shows = await getTVShowsByGenres(ids, 1, streaming);
@@ -524,11 +558,12 @@ const updateWatchlistLink = (currentType) => {
   typeSel.addEventListener("change", async () => {
     setLoadingState(true); // <-- Start Loading
     const newType = typeSel.value || "movie";
+    const moodKey = mood ? mood.value || "" : "";
     savePrefs({ type: newType });
     updateQueryParamsFromForm({
       type: newType,
       genre: genre.value || "",
-      mood: mood ? mood.value || "" : "",
+      mood: moodKey,
       liked: liked ? liked.value || "" : "",
       services: getSelectedServices(),
     });
@@ -537,8 +572,7 @@ const updateWatchlistLink = (currentType) => {
     try {
         // Check if we have a genre selected, otherwise load popular
         const services = getSelectedServices();
-        const genres = genre.value || "";
-        const ids = getGenreIds(genres, newType, "|");
+        const ids = resolveGenreIds(genre.value, moodKey, newType);
 
         if(ids) {
             if (newType === "tv") {
@@ -619,6 +653,9 @@ const updateWatchlistLink = (currentType) => {
         liked: liked ? liked.value || "" : "",
         services: streaming,
       });
+      if (form) {
+        form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+      }
     });
   });
 

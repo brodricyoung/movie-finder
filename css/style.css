@@ -348,6 +348,58 @@ input[type="text"]:focus {
   height: 18px;
 }
 
+.services-accordion {
+  border: 1px solid rgba(255, 211, 105, 0.25);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.services-accordion summary {
+  cursor: pointer;
+  font-weight: 700;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.services-accordion summary::-webkit-details-marker {
+  display: none;
+}
+
+.services-accordion summary::after {
+  content: "▾";
+  font-size: 0.9rem;
+  color: var(--gold);
+  transition: transform 0.15s ease;
+}
+
+.services-accordion[open] summary::after {
+  transform: rotate(180deg);
+}
+
+.services-accordion #streaming-services-list {
+  margin-top: 10px;
+}
+
+@media (min-width: 720px) {
+  .services-accordion {
+    padding: 0;
+    border: none;
+    background: transparent;
+  }
+  .services-accordion summary {
+    display: none;
+  }
+  .services-accordion #streaming-services-list {
+    margin-top: 0;
+  }
+  .services-accordion[open] {
+    display: block;
+  }
+}
+
 /* Submit button — spotlight red */
 #recommend-button {
   grid-column: span 12;
@@ -372,28 +424,47 @@ input[type="text"]:focus {
 
 /* General style for search status banners (success/loading) */
 .search-banner {
-    padding: 15px 20px;
-    margin: 20px 0;
-    border-radius: var(--radius-sm);
-    text-align: center;
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    left: auto;
+    z-index: 250;
+    padding: 12px 16px;
+    margin: 0;
+    max-width: min(360px, calc(100% - 24px));
+    border-radius: var(--radius-md);
+    text-align: left;
     font-weight: 700;
-    opacity: 0; /* Start hidden for transition */
-    transition: opacity 0.5s ease-in-out;
+    opacity: 0;
+    transform: translateY(12px);
+    box-shadow: var(--shadow-hard);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    pointer-events: none; /* Let clicks pass through */
 }
 
 .search-banner p {
     margin: 0;
+    line-height: 1.4;
 }
 
 /* Style for the success/results generated banner */
 #success-banner {
-    background-color: var(--success); /* Uses your defined green */
+    background-color: var(--success);
     color: var(--charcoal); 
 }
 
 /* Class to make the banner visible */
 .search-banner.visible {
     opacity: 1;
+    transform: translateY(0);
+}
+
+@media (max-width: 720px) {
+  .search-banner {
+    left: 10px;
+    right: 10px;
+    bottom: 12px;
+  }
 }
 
 /* The existing loading style block should be updated to include the new loading-state class if it wasn't already there: */
@@ -659,6 +730,64 @@ input[type="text"]:focus {
   padding: 18px;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   overflow-y: auto;
+}
+
+.watchlist-legend {
+  margin: 12px 18px 0;
+  padding: 14px 16px;
+  border: 1px solid rgba(255,211,105,0.35);
+  border-radius: var(--radius-md);
+  background: rgba(255,211,105,0.06);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.watchlist-legend p {
+  margin: 2px 0;
+}
+
+.legend-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.watchlist-heading {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px;
+}
+
+.section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  border: 1px solid rgba(255,255,255,0.18);
+}
+
+.section-label.new {
+  background: rgba(54, 211, 153, 0.15);
+  color: var(--success);
+  border-color: rgba(54, 211, 153, 0.35);
+}
+
+.section-label.all {
+  background: rgba(255, 211, 105, 0.14);
+  color: var(--gold);
+  border-color: rgba(255, 211, 105, 0.35);
+}
+
+.newly-added-marker {
+  outline: 2px solid rgba(54, 211, 153, 0.4);
+  box-shadow: 0 0 0 3px rgba(54, 211, 153, 0.15);
 }
 
 .watchlist-empty {

@@ -16,18 +16,29 @@
         <section id="watchlist-page-container">
             <h2 id="watchlist-title">Saved Titles</h2>
 
+            <section class="watchlist-legend" aria-label="Watchlist layout">
+                <div>
+                    <p class="eyebrow">How this page works</p>
+                    <p>Recently added titles from this visit appear first; your full saved list lives below.</p>
+                </div>
+                <div class="legend-chips">
+                    <span class="section-label new">New this visit</span>
+                    <span class="section-label all">All saved</span>
+                </div>
+            </section>
+
             <p id="watchlist-empty" class="watchlist-empty" style="display:none;">
                 Your watchlist is empty. Add something from the <a href="index.html">recommendations page</a>!
             </p>
 
             <section id="recently-added-section" style="display: none;">
-                <h3>Recently Added This Session</h3>
+                <h3 class="watchlist-heading">Recently Added This Session <span class="section-label new">New</span></h3>
                 <div class="movie-grid watchlist-grid" id="recently-added-content"></div>
                 <hr>
             </section>
             
             <section id="full-watchlist-section">
-                <h3>My Full List</h3>
+                <h3 class="watchlist-heading">My Full List <span class="section-label all">All saved</span></h3>
                 <div class="movie-grid watchlist-grid" id="full-watchlist-content" aria-live="polite"></div>
             </section>
 
