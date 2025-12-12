@@ -100,54 +100,56 @@
 
                 <!-- Streaming Services Checkboxes -->
                 <div class="form-group">
-                    <label>Streaming Services You Have:</label>
-                    <div id="streaming-services-list">
-                        <!-- JS: Collect selected checkboxes to filter results -->
-                        <label class="service-pill">
-                            <input type="checkbox" id="service-amazonprime" name="streaming-service" value="Amazon Prime Video">
-                            <span>Amazon Prime Video</span>
-                        </label>
+                    <details id="services-accordion" class="services-accordion" open>
+                        <summary>Streaming Services You Have</summary>
+                        <div id="streaming-services-list">
+                            <!-- JS: Collect selected checkboxes to filter results -->
+                            <label class="service-pill">
+                                <input type="checkbox" id="service-amazonprime" name="streaming-service" value="Amazon Prime Video">
+                                <span>Amazon Prime Video</span>
+                            </label>
 
-                        <label class="service-pill">
-                            <input type="checkbox" id="service-appletv" name="streaming-service" value="Apple TV Plus">
-                            <span>Apple TV+</span>
-                        </label>
-                        
-                        <label class="service-pill">
-                            <input type="checkbox" id="service-disneyplus" name="streaming-service" value="Disney Plus">
-                            <span>Disney Plus</span>
-                        </label>
+                            <label class="service-pill">
+                                <input type="checkbox" id="service-appletv" name="streaming-service" value="Apple TV Plus">
+                                <span>Apple TV+</span>
+                            </label>
+                            
+                            <label class="service-pill">
+                                <input type="checkbox" id="service-disneyplus" name="streaming-service" value="Disney Plus">
+                                <span>Disney Plus</span>
+                            </label>
 
-                        <label class="service-pill">
-                            <input type="checkbox" id="service-hbo" name="streaming-service" value="HBO Max">
-                            <span>HBO Max</span>
-                        </label>
+                            <label class="service-pill">
+                                <input type="checkbox" id="service-hbo" name="streaming-service" value="HBO Max">
+                                <span>HBO Max</span>
+                            </label>
 
-                        <label class="service-pill">
-                            <input type="checkbox" id="service-hulu" name="streaming-service" value="Hulu">
-                            <span>Hulu</span>
-                        </label>
-                        
-                        <label class="service-pill">
-                            <input type="checkbox" id="service-netflix" name="streaming-service" value="Netflix">
-                            <span>Netflix</span>
-                        </label>
+                            <label class="service-pill">
+                                <input type="checkbox" id="service-hulu" name="streaming-service" value="Hulu">
+                                <span>Hulu</span>
+                            </label>
+                            
+                            <label class="service-pill">
+                                <input type="checkbox" id="service-netflix" name="streaming-service" value="Netflix">
+                                <span>Netflix</span>
+                            </label>
 
-                        <label class="service-pill">
-                            <input type="checkbox" id="service-paramount" name="streaming-service" value="Paramount Plus">
-                            <span>Paramount+</span>
-                        </label>
+                            <label class="service-pill">
+                                <input type="checkbox" id="service-paramount" name="streaming-service" value="Paramount Plus">
+                                <span>Paramount+</span>
+                            </label>
 
-                        <label class="service-pill">
-                            <input type="checkbox" id="service-peacock" name="streaming-service" value="Peacock">
-                            <span>Peacock</span>
-                        </label>
+                            <label class="service-pill">
+                                <input type="checkbox" id="service-peacock" name="streaming-service" value="Peacock">
+                                <span>Peacock</span>
+                            </label>
 
-                        <label class="service-pill">
-                            <input type="checkbox" id="service-youtubetv" name="streaming-service" value="YouTube TV">
-                            <span>YouTube TV</span>
-                        </label>
-                    </div>
+                            <label class="service-pill">
+                                <input type="checkbox" id="service-youtubetv" name="streaming-service" value="YouTube TV">
+                                <span>YouTube TV</span>
+                            </label>
+                        </div>
+                    </details>
                 </div>
 
                 <!-- Previously Liked Movies Input -->

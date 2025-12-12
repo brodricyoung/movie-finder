@@ -65,6 +65,65 @@ const addToWatchlist = (item) => {
   return next;
 };
 
+// query string helpers so filters can be shared/bookmarked
+const applyUrlParamsToForm = ({ typeSel, genre, mood, liked, streamingServices }) => {
+  const params = new URLSearchParams(window.location.search);
+  if (!params.size) return false;
+
+  let applied = false;
+  const type = params.get("type");
+  const genreParam = params.get("genre");
+  const moodParam = params.get("mood");
+  const likedParam = params.get("liked");
+  const servicesParam = params.get("services");
+
+  if (type && typeSel) {
+    typeSel.value = type;
+    applied = true;
+  }
+  if (genreParam && genre) {
+    genre.value = genreParam;
+    applied = true;
+  }
+  if (moodParam && mood) {
+    mood.value = moodParam;
+    applied = true;
+  }
+  if (likedParam && liked) {
+    liked.value = likedParam;
+    applied = true;
+  }
+  if (servicesParam && streamingServices && streamingServices.length) {
+    const services = servicesParam.split(",").map((s) => s.trim()).filter(Boolean);
+    streamingServices.forEach((cb) => {
+      cb.checked = services.includes(cb.value);
+    });
+    applied = true;
+  }
+  return applied;
+};
+
+const updateQueryParamsFromForm = ({ type, genre, mood, liked, services }) => {
+  const params = new URLSearchParams(window.location.search);
+  const setOrDelete = (key, value) => {
+    if (value) {
+      params.set(key, value);
+    } else {
+      params.delete(key);
+    }
+  };
+
+  setOrDelete("type", type);
+  setOrDelete("genre", genre);
+  setOrDelete("mood", mood);
+  setOrDelete("liked", liked);
+  setOrDelete("services", services && services.length ? services.join(",") : "");
+
+  const next = params.toString();
+  const newUrl = next ? `${window.location.pathname}?${next}` : window.location.pathname;
+  history.replaceState(null, "", newUrl);
+};
+
 // ---------- helpers ----------
 const $ = (id) => document.getElementById(id);
 const safe = (v) => (v == null ? "" : String(v));
@@ -75,6 +134,32 @@ const getSelectedServices = () => {
     return Array.from(checkboxes)
         .filter(cb => cb.checked)
         .map(cb => cb.value);
+};
+
+// Mood → genre suggestions to keep mood-only submissions meaningful
+const moodGenreMap = {
+  happy: ["comedy", "family", "animation"],
+  excited: ["action", "adventure", "thriller"],
+  calm: ["drama", "fantasy"],
+  pensive: ["mystery", "documentary", "drama"],
+  scared: ["horror", "thriller"],
+  silly: ["comedy", "animation"],
+  sad: ["drama", "romance"],
+  nostalgic: ["history", "family"],
+  educational: ["documentary"],
+  suspenseful: ["thriller", "crime", "mystery"],
+};
+
+const getGenreIdsForMood = (moodKey, type) => {
+  if (!moodKey) return "";
+  const genres = moodGenreMap[moodKey] || [];
+  return getGenreIds(genres, type, "|");
+};
+
+const resolveGenreIds = (selectedGenre, selectedMood, type) => {
+  const byGenre = getGenreIds(selectedGenre, type, "|");
+  if (byGenre) return byGenre;
+  return getGenreIdsForMood(selectedMood, type);
 };
 
 // Function to display the success banner
@@ -294,7 +379,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const watchlistContent = $("watchlist-content");
   const nav = document.getElementById("primary-nav");
   const navToggle = document.getElementById("menu-toggle");
-
   const prefs = loadPrefs();
 
   if (nav && navToggle) {
@@ -328,6 +412,15 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
+  // override defaults with URL params so filters can be shared/bookmarked
+  const urlApplied = applyUrlParamsToForm({
+    typeSel,
+    genre,
+    mood,
+    liked,
+    streamingServices,
+  });
+
 
   // Helper to update the watchlist link url parameters
 const updateWatchlistLink = (currentType) => {
@@ -341,10 +434,21 @@ const updateWatchlistLink = (currentType) => {
 
 
   const initialType = typeSel.value || "movie";
-  if (prefs.genre) {
-    loadByGenre(initialType, prefs.genre).catch(console.error);
-  } else {
-    loadPopular(initialType).catch(console.error);
+  const shouldRunFromUrl =
+    urlApplied &&
+    (genre.value || liked.value || streamingServices.some((cb) => cb.checked));
+
+  if (!shouldRunFromUrl) {
+    const initialIds = resolveGenreIds(genre.value, mood ? mood.value || "" : "", initialType);
+    if (initialIds) {
+      if (initialType === "tv") {
+        getTVShowsByGenres(initialIds, 1, getSelectedServices()).then((shows) => render(shows, "tv")).catch(console.error);
+      } else {
+        getMoviesByGenres(initialIds, 1, getSelectedServices()).then((movies) => render(movies, "movie")).catch(console.error);
+      }
+    } else {
+      loadPopular(initialType).catch(console.error);
+    }
   }
   updateWatchlistLink(initialType);
 
@@ -354,6 +458,7 @@ const updateWatchlistLink = (currentType) => {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const resultsContainer = $("results");
+    const moodKey = mood ? mood.value || "" : "";
 
     // 1. SET LOADING STATE (Start)
     setLoadingState(true); 
@@ -367,9 +472,16 @@ const updateWatchlistLink = (currentType) => {
     savePrefs({
       genre: genre.value || "",
       type: selectedType,
-      mood: mood ? mood.value || "" : "",
+      mood: moodKey,
       liked: liked ? liked.value || "" : "",
       streamingServices: streaming,
+    });
+    updateQueryParamsFromForm({
+      type: selectedType,
+      genre: genre.value || "",
+      mood: moodKey,
+      liked: liked ? liked.value || "" : "",
+      services: streaming,
     });
     updateWatchlistLink(selectedType);
 
@@ -405,7 +517,7 @@ const updateWatchlistLink = (currentType) => {
 
       // 4. Fallback: If no text input (or search failed), load by Genre/Popularity
       // We call the underlying logic directly, which will call render.
-      const ids = getGenreIds(genre.value, selectedType, "|");
+      const ids = resolveGenreIds(genre.value, moodKey, selectedType);
       if (ids) {
         if (selectedType === "tv") {
           const shows = await getTVShowsByGenres(ids, 1, streaming);
@@ -436,20 +548,31 @@ const updateWatchlistLink = (currentType) => {
     }
   });
 
+  if (shouldRunFromUrl) {
+    form.dispatchEvent(new Event("submit"));
+  }
+
 
 
   // when user switches "Movie / TV Show", refresh the list
   typeSel.addEventListener("change", async () => {
     setLoadingState(true); // <-- Start Loading
     const newType = typeSel.value || "movie";
+    const moodKey = mood ? mood.value || "" : "";
     savePrefs({ type: newType });
+    updateQueryParamsFromForm({
+      type: newType,
+      genre: genre.value || "",
+      mood: moodKey,
+      liked: liked ? liked.value || "" : "",
+      services: getSelectedServices(),
+    });
     updateWatchlistLink(newType); 
     
     try {
         // Check if we have a genre selected, otherwise load popular
         const services = getSelectedServices();
-        const genres = genre.value || "";
-        const ids = getGenreIds(genres, newType, "|");
+        const ids = resolveGenreIds(genre.value, moodKey, newType);
 
         if(ids) {
             if (newType === "tv") {
@@ -481,18 +604,39 @@ const updateWatchlistLink = (currentType) => {
   if (genre) {
     genre.addEventListener("change", () => {
       savePrefs({ genre: genre.value || "" });
+      updateQueryParamsFromForm({
+        type: typeSel ? typeSel.value || "movie" : "movie",
+        genre: genre.value || "",
+        mood: mood ? mood.value || "" : "",
+        liked: liked ? liked.value || "" : "",
+        services: getSelectedServices(),
+      });
     });
   }
 
   if (mood) {
     mood.addEventListener("change", () => {
       savePrefs({ mood: mood.value || "" });
+      updateQueryParamsFromForm({
+        type: typeSel ? typeSel.value || "movie" : "movie",
+        genre: genre ? genre.value || "" : "",
+        mood: mood.value || "",
+        liked: liked ? liked.value || "" : "",
+        services: getSelectedServices(),
+      });
     });
   }
 
   if (liked) {
     liked.addEventListener("input", () => {
       savePrefs({ liked: liked.value || "" });
+      updateQueryParamsFromForm({
+        type: typeSel ? typeSel.value || "movie" : "movie",
+        genre: genre ? genre.value || "" : "",
+        mood: mood ? mood.value || "" : "",
+        liked: liked.value || "",
+        services: getSelectedServices(),
+      });
     });
   }
 
@@ -502,6 +646,16 @@ const updateWatchlistLink = (currentType) => {
         .filter((item) => item.checked)
         .map((item) => item.value);
       savePrefs({ streamingServices: streaming });
+      updateQueryParamsFromForm({
+        type: typeSel ? typeSel.value || "movie" : "movie",
+        genre: genre ? genre.value || "" : "",
+        mood: mood ? mood.value || "" : "",
+        liked: liked ? liked.value || "" : "",
+        services: streaming,
+      });
+      if (form) {
+        form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+      }
     });
   });
 
