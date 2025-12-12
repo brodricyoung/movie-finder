@@ -65,6 +65,65 @@ const addToWatchlist = (item) => {
   return next;
 };
 
+// query string helpers so filters can be shared/bookmarked
+const applyUrlParamsToForm = ({ typeSel, genre, mood, liked, streamingServices }) => {
+  const params = new URLSearchParams(window.location.search);
+  if (!params.size) return false;
+
+  let applied = false;
+  const type = params.get("type");
+  const genreParam = params.get("genre");
+  const moodParam = params.get("mood");
+  const likedParam = params.get("liked");
+  const servicesParam = params.get("services");
+
+  if (type && typeSel) {
+    typeSel.value = type;
+    applied = true;
+  }
+  if (genreParam && genre) {
+    genre.value = genreParam;
+    applied = true;
+  }
+  if (moodParam && mood) {
+    mood.value = moodParam;
+    applied = true;
+  }
+  if (likedParam && liked) {
+    liked.value = likedParam;
+    applied = true;
+  }
+  if (servicesParam && streamingServices && streamingServices.length) {
+    const services = servicesParam.split(",").map((s) => s.trim()).filter(Boolean);
+    streamingServices.forEach((cb) => {
+      cb.checked = services.includes(cb.value);
+    });
+    applied = true;
+  }
+  return applied;
+};
+
+const updateQueryParamsFromForm = ({ type, genre, mood, liked, services }) => {
+  const params = new URLSearchParams(window.location.search);
+  const setOrDelete = (key, value) => {
+    if (value) {
+      params.set(key, value);
+    } else {
+      params.delete(key);
+    }
+  };
+
+  setOrDelete("type", type);
+  setOrDelete("genre", genre);
+  setOrDelete("mood", mood);
+  setOrDelete("liked", liked);
+  setOrDelete("services", services && services.length ? services.join(",") : "");
+
+  const next = params.toString();
+  const newUrl = next ? `${window.location.pathname}?${next}` : window.location.pathname;
+  history.replaceState(null, "", newUrl);
+};
+
 // ---------- helpers ----------
 const $ = (id) => document.getElementById(id);
 const safe = (v) => (v == null ? "" : String(v));
@@ -294,7 +353,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const watchlistContent = $("watchlist-content");
   const nav = document.getElementById("primary-nav");
   const navToggle = document.getElementById("menu-toggle");
-
   const prefs = loadPrefs();
 
   if (nav && navToggle) {
@@ -328,6 +386,15 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
+  // override defaults with URL params so filters can be shared/bookmarked
+  const urlApplied = applyUrlParamsToForm({
+    typeSel,
+    genre,
+    mood,
+    liked,
+    streamingServices,
+  });
+
 
   // Helper to update the watchlist link url parameters
 const updateWatchlistLink = (currentType) => {
@@ -341,9 +408,13 @@ const updateWatchlistLink = (currentType) => {
 
 
   const initialType = typeSel.value || "movie";
-  if (prefs.genre) {
+  const shouldRunFromUrl =
+    urlApplied &&
+    (genre.value || liked.value || streamingServices.some((cb) => cb.checked));
+
+  if (!shouldRunFromUrl && prefs.genre) {
     loadByGenre(initialType, prefs.genre).catch(console.error);
-  } else {
+  } else if (!shouldRunFromUrl) {
     loadPopular(initialType).catch(console.error);
   }
   updateWatchlistLink(initialType);
@@ -370,6 +441,13 @@ const updateWatchlistLink = (currentType) => {
       mood: mood ? mood.value || "" : "",
       liked: liked ? liked.value || "" : "",
       streamingServices: streaming,
+    });
+    updateQueryParamsFromForm({
+      type: selectedType,
+      genre: genre.value || "",
+      mood: mood ? mood.value || "" : "",
+      liked: liked ? liked.value || "" : "",
+      services: streaming,
     });
     updateWatchlistLink(selectedType);
 
@@ -436,6 +514,10 @@ const updateWatchlistLink = (currentType) => {
     }
   });
 
+  if (shouldRunFromUrl) {
+    form.dispatchEvent(new Event("submit"));
+  }
+
 
 
   // when user switches "Movie / TV Show", refresh the list
@@ -443,6 +525,13 @@ const updateWatchlistLink = (currentType) => {
     setLoadingState(true); // <-- Start Loading
     const newType = typeSel.value || "movie";
     savePrefs({ type: newType });
+    updateQueryParamsFromForm({
+      type: newType,
+      genre: genre.value || "",
+      mood: mood ? mood.value || "" : "",
+      liked: liked ? liked.value || "" : "",
+      services: getSelectedServices(),
+    });
     updateWatchlistLink(newType); 
     
     try {
@@ -481,18 +570,39 @@ const updateWatchlistLink = (currentType) => {
   if (genre) {
     genre.addEventListener("change", () => {
       savePrefs({ genre: genre.value || "" });
+      updateQueryParamsFromForm({
+        type: typeSel ? typeSel.value || "movie" : "movie",
+        genre: genre.value || "",
+        mood: mood ? mood.value || "" : "",
+        liked: liked ? liked.value || "" : "",
+        services: getSelectedServices(),
+      });
     });
   }
 
   if (mood) {
     mood.addEventListener("change", () => {
       savePrefs({ mood: mood.value || "" });
+      updateQueryParamsFromForm({
+        type: typeSel ? typeSel.value || "movie" : "movie",
+        genre: genre ? genre.value || "" : "",
+        mood: mood.value || "",
+        liked: liked ? liked.value || "" : "",
+        services: getSelectedServices(),
+      });
     });
   }
 
   if (liked) {
     liked.addEventListener("input", () => {
       savePrefs({ liked: liked.value || "" });
+      updateQueryParamsFromForm({
+        type: typeSel ? typeSel.value || "movie" : "movie",
+        genre: genre ? genre.value || "" : "",
+        mood: mood ? mood.value || "" : "",
+        liked: liked.value || "",
+        services: getSelectedServices(),
+      });
     });
   }
 
@@ -502,6 +612,13 @@ const updateWatchlistLink = (currentType) => {
         .filter((item) => item.checked)
         .map((item) => item.value);
       savePrefs({ streamingServices: streaming });
+      updateQueryParamsFromForm({
+        type: typeSel ? typeSel.value || "movie" : "movie",
+        genre: genre ? genre.value || "" : "",
+        mood: mood ? mood.value || "" : "",
+        liked: liked ? liked.value || "" : "",
+        services: streaming,
+      });
     });
   });
 
