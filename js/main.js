@@ -740,3 +740,26 @@ const updateWatchlistLink = (currentType) => {
   // Note: Watchlist modal logic moved to specific section, simplified here
   // Check if needed or if existing code handles it
 });
+
+
+
+// ---------- DYNAMIC HEADER OFFSET FOR ANCHOR LINKS ----------
+function updateHeaderOffset() {
+  const header = document.getElementById('site-header');
+  if (!header) return;
+
+  const height = header.getBoundingClientRect().height;
+  document.documentElement.style.setProperty(
+    '--header-height',
+    `${height + 80}px`
+  );
+}
+
+window.addEventListener('DOMContentLoaded', updateHeaderOffset);
+window.addEventListener('resize', updateHeaderOffset);
+
+const header = document.getElementById('site-header');
+if (header && 'ResizeObserver' in window) {
+  new ResizeObserver(updateHeaderOffset).observe(header);
+}
+

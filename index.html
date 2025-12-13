@@ -9,7 +9,7 @@
 </head>
 <body>
 
-    <header>
+    <header id="site-header">
         <div class="brand">
             <button id="menu-toggle" class="menu-toggle" aria-expanded="false" aria-controls="primary-nav">
                 <span class="sr-only">Toggle navigation</span>
@@ -35,7 +35,7 @@
                 <p>✅ Recommendations successfully generated!</p>
             </div>
 
-        <section id="finder-form-section">
+        <section id="finder-form-section" class="anchor-target">
             <h2>Tell Us What You're in the Mood For</h2>
 
             <form id="finder-form">   <!-- JS Target: Handle form submission to generate recommendations -->
@@ -102,7 +102,7 @@
                 <div class="form-group">
                     <details id="services-accordion" class="services-accordion" open>
                         <summary>Streaming Services You Have</summary>
-                        <div id="streaming-services-list">
+                        <div id="streaming-services-list" class="anchor-target">
                             <!-- JS: Collect selected checkboxes to filter results -->
                             <label class="service-pill">
                                 <input type="checkbox" id="service-amazonprime" name="streaming-service" value="Amazon Prime Video">
@@ -174,7 +174,7 @@
                 <p>Generating recommendations...</p>
             </div>
 
-            <div class="movie-grid recommended-grid" id="results"></div>
+            <div id="results" class="movie-grid recommended-grid anchor-target"></div>
         </section>
 
     </main>

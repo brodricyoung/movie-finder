@@ -840,3 +840,7 @@ button:focus-visible { box-shadow: var(--ring); outline: none; }
   .movie-card-inner { transition: none; }
   .view-watchlist-button, #recommend-button, .add-to-watchlist-btn, .remove-from-watchlist-btn, #save-watchlist-button { transition: none; }
 }
+
+.anchor-target {
+  scroll-margin-top: var(--header-height, 0px);
+}
